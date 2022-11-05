@@ -45,6 +45,7 @@ def send_welcome(message):
 def bot_send_text(message):
     global number_start
     global user_in_game
+    global user_first_game
     global trys
     global numero_seleccionado
     global max_number
@@ -61,16 +62,20 @@ def bot_send_text(message):
                         bot.send_message(message.chat.id,"{}".format(i))
                     bot.send_message(message.chat.id,"escriba la cantidad de intentos")
                 else:
-                    user_in_game.append((message.json)['from']['id'])
-                    user_first_game.append((message.json)['from']['first_name'])
-                    bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
-                    bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+                    if((message.json)['from']['first_name'] in user_first_game):
+                        bot.send_message(message.chat.id,"este usuario ya se añadio")
+                    else:
+                        user_in_game.append((message.json)['from']['id'])
+                        user_first_game.append((message.json)['from']['first_name'])
+                        bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
+                        bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
   
             elif(trys != 0):
                 try:
                     max_number = int(message.text)
                     numero_seleccionado = random.randint(0,max_number)
                     bot.send_message(message.chat.id,"numero maximo elegido {}".format(max_number))
+                    bot.send_message(message.chat.id,"escribe un numero :)")
                 except:
                     bot.send_message(message.chat.id,"no es un numero ERROR")
             else:
@@ -81,13 +86,17 @@ def bot_send_text(message):
                 except:
                     bot.send_message(message.chat.id,"no es un numero AQUI {}".format(user_in_game))
         elif(number_start == True and max_number != 0):
-            bot.send_message(message.chat.id,"el numero escrito es...")
+            bot.send_message(message.chat.id,"el numero escrito por {} es...".format((message.json)['from']['first_name']))
             try:
                 if(int(message.text) == numero_seleccionado):
                     bot.send_message(message.chat.id,"... igual ganaste {}".format((message.json)['from']['first_name']))
+                    user_in_game = []
+                    user_first_game = []
                     number_start = False
-                    max_number = 0
+                    stop_iterator = False
                     trys = 0
+                    max_number = 0
+                    numero_seleccionado = 0
                 elif(int(message.text) > numero_seleccionado):
                     bot.send_message(message.chat.id,"... mayor, por tanto, el numero seleccionado es MENOR {}".format(numero_seleccionado))
                 elif(int(message.text) < numero_seleccionado):
