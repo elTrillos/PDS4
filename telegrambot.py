@@ -111,10 +111,10 @@ def bot_send_text(message):
                         trys_list.remove([(message.json)['from']['first_name'],val_try])
                         val_try = val_try-1
                         trys_list.append([(message.json)['from']['first_name'],val_try])
-                        print(trys_list)
+                        print(trys_list,"oasdkskds")
                         val_try = 0
                         if(trys_list[i][1] < 0 ):
-                            loser_list.append((message.json)['from']['first_name'])
+                            loser_list.append(trys_list[i][0])
                             print(loser_list)
                 if(int(message.text) == numero_seleccionado and (message.json)['from']['first_name'] not in loser_list):
                     bot.send_message(message.chat.id,"... igual ganaste {}".format((message.json)['from']['first_name']))
