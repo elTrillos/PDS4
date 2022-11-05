@@ -3,8 +3,12 @@ import telebot
 import random
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
+user_in_game = []
+user_first_game = []
 number_start = False
 trivia_start = False
+stop_iterator = False
+trys = 0
 max_number = 0
 numero_seleccionado = 0
 
@@ -13,11 +17,10 @@ def send_welcome(message):
     global trivia_start
     global number_start
     global max_number
-    rom = "from"
     global numero_seleccionado
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
-        bot.send_message(message.chat.id,"escriba el numero maximo, a elegir")
+        bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
         number_start = True
         numero_seleccionado = random.randint(0,10)
     elif(message.text.startswith("/trivia")):
@@ -41,27 +44,52 @@ def send_welcome(message):
 @bot.message_handler(content_types=["text"])
 def bot_send_text(message):
     global number_start
+    global user_in_game
+    global trys
     global numero_seleccionado
     global max_number
+    global stop_iterator
     if(message.text.startswith("/")):
         bot.send_message(message.chat.id,"ejemplito")
     else:
         if(number_start == True and max_number == 0):
-            try:
-                max_number = int(message.text)
-                numero_seleccionado = random.randint(0,max_number)
-                bot.send_message(message.chat.id,"numero elegido")
-            except:
-                bot.send_message(message.chat.id,"no es un numero")
+            if(stop_iterator != True):
+                if(message.text == 'stop'):
+                    stop_iterator = True
+                    bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
+                    for i in user_first_game:
+                        bot.send_message(message.chat.id,"{}".format(i))
+                    bot.send_message(message.chat.id,"escriba la cantidad de intentos")
+                else:
+                    user_in_game.append((message.json)['from']['id'])
+                    user_first_game.append((message.json)['from']['first_name'])
+                    bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
+                    bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+  
+            elif(trys != 0):
+                try:
+                    max_number = int(message.text)
+                    numero_seleccionado = random.randint(0,max_number)
+                    bot.send_message(message.chat.id,"numero maximo elegido {}".format(max_number))
+                except:
+                    bot.send_message(message.chat.id,"no es un numero ERROR")
+            else:
+                try:
+                    trys = int(message.text)
+                    bot.send_message(message.chat.id,"numero de intentos {}".format(trys))
+                    bot.send_message(message.chat.id,"escriba el numero maximo")
+                except:
+                    bot.send_message(message.chat.id,"no es un numero AQUI {}".format(user_in_game))
         elif(number_start == True and max_number != 0):
             bot.send_message(message.chat.id,"el numero escrito es...")
             try:
                 if(int(message.text) == numero_seleccionado):
-                    bot.send_message(message.chat.id,"... igual ganaste")
+                    bot.send_message(message.chat.id,"... igual ganaste {}".format((message.json)['from']['first_name']))
                     number_start = False
                     max_number = 0
+                    trys = 0
                 elif(int(message.text) > numero_seleccionado):
-                    bot.send_message(message.chat.id,"... mayor, por tanto, el numero seleccionado es MENOR")
+                    bot.send_message(message.chat.id,"... mayor, por tanto, el numero seleccionado es MENOR {}".format(numero_seleccionado))
                 elif(int(message.text) < numero_seleccionado):
                     bot.send_message(message.chat.id,"... menor, por tanto, el numero seleccionado es MAYOR")
                 else:
