@@ -13,6 +13,7 @@ def send_welcome(message):
     global trivia_start
     global number_start
     global max_number
+    rom = "from"
     global numero_seleccionado
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
@@ -23,10 +24,11 @@ def send_welcome(message):
         bot.send_message(message.chat.id,"empezando el juego trivia ...")
         trivia_start = True
     elif(message.text.startswith("/help")):
-        bot.send_message(message.chat.id,"comandos disponibles:")
+        bot.reply_to(message,"comandos disponibles:")
         bot.send_message(message.chat.id,"/number")
         bot.send_message(message.chat.id,"/trivia")
         bot.send_message(message.chat.id,"/extra")
+        bot.send_message(message.chat.id,"el chat id {}".format(message.chat.id))
     elif(message.text.startswith("/stop")):
         bot.send_message(message.chat.id,"juego terminado")
         number_start = False
