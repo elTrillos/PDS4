@@ -5,6 +5,8 @@ import random
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 user_in_game = []
 user_first_game = []
+trys_list = []
+loser_list = []
 number_start = False
 trivia_start = False
 stop_iterator = False
@@ -18,6 +20,10 @@ def send_welcome(message):
     global number_start
     global max_number
     global numero_seleccionado
+    global user_in_game
+    global user_first_game
+    global loser_list
+    global trys_list
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
         bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
@@ -37,6 +43,10 @@ def send_welcome(message):
         bot.send_message(message.chat.id,"juego terminado")
         number_start = False
         trivia_start = False
+        user_in_game = []
+        user_first_game = []
+        loser_list = []
+        trys_list = []
         max_number = 0
     else:
 	    bot.reply_to(message, "COMANDO INVALIDO")
@@ -46,10 +56,13 @@ def bot_send_text(message):
     global number_start
     global user_in_game
     global user_first_game
+    global trys_list
     global trys
     global numero_seleccionado
     global max_number
     global stop_iterator
+    global loser_list
+    val_try = 0
     if(message.text.startswith("/")):
         bot.send_message(message.chat.id,"ejemplito")
     else:
@@ -81,26 +94,45 @@ def bot_send_text(message):
             else:
                 try:
                     trys = int(message.text)
+                    for i in user_first_game:
+                        trys_list.append([i,trys])
                     bot.send_message(message.chat.id,"numero de intentos {}".format(trys))
+                    bot.send_message(message.chat.id,"lista {}".format(trys_list))
                     bot.send_message(message.chat.id,"escriba el numero maximo")
                 except:
-                    bot.send_message(message.chat.id,"no es un numero AQUI {}".format(user_in_game))
+                    bot.send_message(message.chat.id,"no es un numero AQUI {}".format(trys_list))
         elif(number_start == True and max_number != 0):
             bot.send_message(message.chat.id,"el numero escrito por {} es...".format((message.json)['from']['first_name']))
             try:
-                if(int(message.text) == numero_seleccionado):
+                for i in range(len(trys_list)):
+                    if(trys_list[i][0] == (message.json)['from']['first_name']):
+                        val_try = trys_list[i][1]  
+                        print(val_try)
+                        trys_list.remove([(message.json)['from']['first_name'],val_try])
+                        val_try = val_try-1
+                        trys_list.append([(message.json)['from']['first_name'],val_try])
+                        print(trys_list)
+                        val_try = 0
+                        if(trys_list[i][1] < 0 ):
+                            loser_list.append((message.json)['from']['first_name'])
+                            print(loser_list)
+                if(int(message.text) == numero_seleccionado and (message.json)['from']['first_name'] not in loser_list):
                     bot.send_message(message.chat.id,"... igual ganaste {}".format((message.json)['from']['first_name']))
                     user_in_game = []
                     user_first_game = []
+                    trys_list = []
+                    loser_list = []
                     number_start = False
                     stop_iterator = False
                     trys = 0
                     max_number = 0
                     numero_seleccionado = 0
-                elif(int(message.text) > numero_seleccionado):
+                elif(int(message.text) > numero_seleccionado and (message.json)['from']['first_name'] not in loser_list):
                     bot.send_message(message.chat.id,"... mayor, por tanto, el numero seleccionado es MENOR {}".format(numero_seleccionado))
-                elif(int(message.text) < numero_seleccionado):
+                elif(int(message.text) < numero_seleccionado and (message.json)['from']['first_name'] not in loser_list):
                     bot.send_message(message.chat.id,"... menor, por tanto, el numero seleccionado es MAYOR")
+                elif((message.json)['from']['first_name'] in loser_list):
+                    bot.send_message(message.chat.id,"jugador {} no le quedan intentos :(".format((message.json)['from']['first_name']))
                 else:
                     bot.send_message(message.chat.id,"no es un numero {}".format(numero_seleccionado))
             except:
