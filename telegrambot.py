@@ -28,7 +28,8 @@ def send_welcome(message):
         bot.send_message(message.chat.id,"/number")
         bot.send_message(message.chat.id,"/trivia")
         bot.send_message(message.chat.id,"/extra")
-        bot.send_message(message.chat.id,"el chat id {}".format(message.chat.id))
+        bot.send_message(message.chat.id,"el json {}".format(message.json))
+        bot.send_message(message.chat.id,"el otra cosa {}".format((message.json)['from']['id'])) #el identificador individual de cada usuario.
     elif(message.text.startswith("/stop")):
         bot.send_message(message.chat.id,"juego terminado")
         number_start = False
