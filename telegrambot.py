@@ -1,9 +1,15 @@
 from config import *
 import telebot
 from  telebot.types import ForceReply
+from flask import Flask, request #crea servidor wewb
+from pyngrok import ngrok, conf 
 import random
+import time
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
+web_app_server = Flask(__name__)
+
+#variables
 user_in_game = []
 user_first_game = []
 trys_list = []
@@ -15,6 +21,14 @@ trys = 0
 max_number = 0
 numero_seleccionado = 0
 
+#decoradores
+@web_app_server.route('/',methods=['POST'])
+def webhook():
+    if request.headers.get("content-type") == "application/json":
+        update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
+        bot.process_new_updates([update])
+        return "OK", 200
+
 @bot.message_handler(commands=['start', 'help', 'number', 'trivia','extra', 'stop'])
 def send_welcome(message):
     global trivia_start
@@ -25,6 +39,8 @@ def send_welcome(message):
     global user_first_game
     global loser_list
     global trys_list
+    global stop_iterator
+    global trys
     markup = ForceReply()
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
@@ -39,17 +55,20 @@ def send_welcome(message):
         bot.send_message(message.chat.id,"/number")
         bot.send_message(message.chat.id,"/trivia")
         bot.send_message(message.chat.id,"/extra")
-        bot.send_message(message.chat.id,"el json {}".format(message.json))
-        bot.send_message(message.chat.id,"el otra cosa {}".format((message.json)['from']['id'])) #el identificador individual de cada usuario.
+        #bot.send_message(message.chat.id,"el json {}".format(message.json))
+        #bot.send_message(message.chat.id,"el otra cosa {}".format((message.json)['from']['id'])) #el identificador individual de cada usuario.
     elif(message.text.startswith("/stop")):
         bot.send_message(message.chat.id,"juego terminado")
-        number_start = False
-        trivia_start = False
         user_in_game = []
         user_first_game = []
-        loser_list = []
         trys_list = []
+        loser_list = []
+        number_start = False
+        trivia_start = False
+        stop_iterator = False
+        trys = 0
         max_number = 0
+        numero_seleccionado = 0
     else:
 	    bot.reply_to(message, "COMANDO INVALIDO")
 
@@ -93,7 +112,7 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"numero maximo elegido {}".format(max_number))
                     bot.send_message(message.chat.id,"escribe un numero :)",reply_markup=markup)
                 except:
-                    bot.send_message(message.chat.id,"no es un numero ERROR")
+                    bot.send_message(message.chat.id,"no es un numero ERROR, ingrese el numero maximo")
             else:
                 try:
                     trys = int(message.text)
@@ -103,7 +122,7 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"lista {}".format(trys_list))
                     bot.send_message(message.chat.id,"escriba el numero maximo",reply_markup=markup)
                 except:
-                    bot.send_message(message.chat.id,"no es un numero AQUI {}".format(trys_list))
+                    bot.send_message(message.chat.id,"no es un numero, ingrese el numero de intentos")
         elif(number_start == True and max_number != 0 and (message.json)['from']['first_name'] in user_first_game):
             try:
                 for i in range(len(trys_list)):
@@ -143,7 +162,26 @@ def bot_send_text(message):
             except:
                  bot.send_message(message.chat.id,"no es un numero {}".format(numero_seleccionado))
         else:
-            bot.send_message(message.chat.id,"se agradece el comando {}".format(number_start))
+            None
+
 if __name__ == '__main__':
     print("iniciando el maravillos bot")
-    bot.infinity_polling()
+    #bot.infinity_polling()
+    #definimos la ruta del archivo de configuracion de ngrok
+    conf.get_default().config_path = "./config_ngrok.yml"
+    #configuramos la region del servidor de ngrok
+    conf.get_default().region = "sa"
+    #creamos el archivo de credenciales de la api
+    ngrok.set_auth_token(NGROK_TOKEN)
+    # creamos un tunel https en el puerto 5000
+    ngrok_tunel = ngrok.connect(5001,bind_tls=True)
+    #url del tunel https creado
+    ngrok_url = ngrok_tunel.public_url
+    print("url ngrok: {}".format(ngrok_url))
+    #eliminamos el webhook anterior
+    bot.remove_webhook()
+    #pequeña pausa para eliminar el webhook
+    time.sleep(1)
+    #definimos el webhook
+    bot.set_webhook(url=ngrok_url)
+    web_app_server.run(host="0.0.0.0", port=5001)
