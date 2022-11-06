@@ -1,5 +1,6 @@
 from config import *
 import telebot
+from  telebot.types import ForceReply
 import random
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
@@ -24,6 +25,7 @@ def send_welcome(message):
     global user_first_game
     global loser_list
     global trys_list
+    markup = ForceReply()
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
         bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
@@ -62,6 +64,7 @@ def bot_send_text(message):
     global max_number
     global stop_iterator
     global loser_list
+    markup = ForceReply()
     val_try = 0
     if(message.text.startswith("/")):
         bot.send_message(message.chat.id,"ejemplito")
@@ -73,7 +76,7 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
                     for i in user_first_game:
                         bot.send_message(message.chat.id,"{}".format(i))
-                    bot.send_message(message.chat.id,"escriba la cantidad de intentos")
+                    bot.send_message(message.chat.id,"escriba la cantidad de intentos",reply_markup=markup)
                 else:
                     if((message.json)['from']['first_name'] in user_first_game):
                         bot.send_message(message.chat.id,"este usuario ya se añadio")
@@ -88,7 +91,7 @@ def bot_send_text(message):
                     max_number = int(message.text)
                     numero_seleccionado = random.randint(0,max_number)
                     bot.send_message(message.chat.id,"numero maximo elegido {}".format(max_number))
-                    bot.send_message(message.chat.id,"escribe un numero :)")
+                    bot.send_message(message.chat.id,"escribe un numero :)",reply_markup=markup)
                 except:
                     bot.send_message(message.chat.id,"no es un numero ERROR")
             else:
@@ -98,20 +101,21 @@ def bot_send_text(message):
                         trys_list.append([i,trys])
                     bot.send_message(message.chat.id,"numero de intentos {}".format(trys))
                     bot.send_message(message.chat.id,"lista {}".format(trys_list))
-                    bot.send_message(message.chat.id,"escriba el numero maximo")
+                    bot.send_message(message.chat.id,"escriba el numero maximo",reply_markup=markup)
                 except:
                     bot.send_message(message.chat.id,"no es un numero AQUI {}".format(trys_list))
-        elif(number_start == True and max_number != 0):
-            bot.send_message(message.chat.id,"el numero escrito por {} es...".format((message.json)['from']['first_name']))
+        elif(number_start == True and max_number != 0 and (message.json)['from']['first_name'] in user_first_game):
             try:
                 for i in range(len(trys_list)):
                     if(trys_list[i][0] == (message.json)['from']['first_name']):
+                        bot.send_message(message.chat.id,"intento n°{} de {}. escrito por {} es...".format(trys_list[i][1],trys,trys_list[i][0]))
                         val_try = trys_list[i][1]  
                         print(val_try)
                         trys_list.remove([(message.json)['from']['first_name'],val_try])
                         val_try = val_try-1
                         trys_list.append([(message.json)['from']['first_name'],val_try])
                         print(trys_list,"oasdkskds")
+                        print("---------------------------------------------------------------")
                         val_try = 0
                         if(trys_list[i][1] < 0 ):
                             loser_list.append(trys_list[i][0])
@@ -123,6 +127,7 @@ def bot_send_text(message):
                     trys_list = []
                     loser_list = []
                     number_start = False
+                    trivia_start = False
                     stop_iterator = False
                     trys = 0
                     max_number = 0
