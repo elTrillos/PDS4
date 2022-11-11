@@ -1,5 +1,6 @@
 
 from config import *
+from trivia_api import TRIVIA_API
 import telebot
 from  telebot.types import ForceReply
 from flask import Flask, request #crea servidor wewb
@@ -15,12 +16,20 @@ user_in_game = []
 user_first_game = []
 trys_list = []
 loser_list = []
+random_categories = []
+multiple_question_response = []
 number_start = False
 trivia_start = False
 stop_iterator = False
 trys = 0
 max_number = 0
 numero_seleccionado = 0
+question_count = 0
+
+#incorporando preguntas
+for i in range(len((TRIVIA_API['results']))):
+    random_categories.append(TRIVIA_API['results'][i])
+random.shuffle(random_categories)
 
 #decoradores
 @web_app_server.route('/',methods=['POST'])
@@ -42,6 +51,8 @@ def send_welcome(message):
     global trys_list
     global stop_iterator
     global trys
+    global question_count
+    global multiple_question_response
     markup = ForceReply()
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
@@ -50,6 +61,8 @@ def send_welcome(message):
         numero_seleccionado = random.randint(0,10)
     elif(message.text.startswith("/trivia")):
         bot.send_message(message.chat.id,"empezando el juego trivia ...")
+        random.shuffle(random_categories)
+        bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
         trivia_start = True
     elif(message.text.startswith("/help") or message.text.startswith("/start") ):
         bot.reply_to(message,"comandos disponibles:")
@@ -70,6 +83,8 @@ def send_welcome(message):
         trys = 0
         max_number = 0
         numero_seleccionado = 0
+        question_count = 0
+        multiple_question_response = []
     elif(message.text.startswith("/extra")):
         bot.send_message(message.chat.id,"3°juego En DESARROLLO -_-")
     elif(message.text.startswith("/stats")):
@@ -88,12 +103,16 @@ def bot_send_text(message):
     global max_number
     global stop_iterator
     global loser_list
+    global question_count
+    global trivia_start
+    global multiple_question_response
     markup = ForceReply()
     val_try = 0
     if(message.text.startswith("/")):
         bot.send_message(message.chat.id,"ejemplito")
     else:
-        if(number_start == True and max_number == 0):
+        if(number_start == True and max_number == 0 ):
+            trivia_start = False
             if(stop_iterator != True):
                 if(message.text == 'stop'):
                     stop_iterator = True
@@ -128,6 +147,67 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"escriba el numero maximo",reply_markup=markup)
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese el numero de intentos")
+        elif(trivia_start == True and question_count == 0 ):
+            number_start = False
+            if(stop_iterator != True):
+                if(message.text == 'stop'):
+                    stop_iterator = True
+                    bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
+                    for i in user_first_game:
+                        bot.send_message(message.chat.id,"{}".format(i))
+                    bot.send_message(message.chat.id,"escriba la cantidad de preguntas",reply_markup=markup)
+                else:
+                    if((message.json)['from']['first_name'] in user_first_game):
+                        bot.send_message(message.chat.id,"este usuario ya se añadio")
+                    else:
+                        user_in_game.append((message.json)['from']['id'])
+                        user_first_game.append((message.json)['from']['first_name'])
+                        bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
+                        bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+            else:
+                bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
+                try:
+                    question_count = int(message.text)
+                    bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
+                    if(question_count > 0):
+                        for i in range(question_count):
+                            response_list = []
+                            response_list.append(random_categories[i]['incorrect_answers'][0])
+                            response_list.append(random_categories[i]['incorrect_answers'][1])
+                            response_list.append(random_categories[i]['incorrect_answers'][2])
+                            response_list.append(random_categories[i]['correct_answer'])
+                            random.shuffle(response_list)
+                            bot.send_message(message.chat.id, "tema: {}\n pregunta n°{}: {} \n alternativas: \nA: {}\nB: {}\nC: {}\nD: {}".format(
+                                random_categories[i]['category'],i+1,random_categories[i]['question'],response_list[0],
+                                response_list[1],response_list[2],response_list[3]))
+                            multiple_question_response.append(response_list)
+                            response_list = []
+                    else:
+                        bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
+                        question_count = 0
+                except:
+                    bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
+        elif(trivia_start == True and question_count != 0):
+            if(message.text == 'A' or message.text == 'a'):
+                if(multiple_question_response[0][0] == random_categories[0]['correct_answer']):
+                    bot.send_message(message.chat.id,"esta correcta ")
+                else:
+                    bot.send_message(message.chat.id,"esta INcorrecta ")
+            if(message.text == 'B' or message.text == 'b'):
+                if(multiple_question_response[0][1] == random_categories[0]['correct_answer']):
+                    bot.send_message(message.chat.id,"esta correcta ")
+                else:
+                    bot.send_message(message.chat.id,"esta INcorrecta ")
+            if(message.text == 'C' or message.text == 'c'):
+                if(multiple_question_response[0][2] == random_categories[0]['correct_answer']):
+                    bot.send_message(message.chat.id,"esta correcta ")
+                else:
+                    bot.send_message(message.chat.id,"esta INcorrecta ")
+            if(message.text == 'D' or message.text == 'd'):
+                if(multiple_question_response[0][3] == random_categories[0]['correct_answer']):
+                    bot.send_message(message.chat.id,"esta correcta ")
+                else:
+                    bot.send_message(message.chat.id,"esta INcorrecta ")
         elif(number_start == True and max_number != 0 and (message.json)['from']['first_name'] in user_first_game):
             try:
                 for i in range(len(trys_list)):
@@ -181,10 +261,14 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"no es un numero {}".format(numero_seleccionado))
             except:
                  bot.send_message(message.chat.id,"no es un numero")
+        
         else:
             None
 
 if __name__ == '__main__':
+    #print("nivel: {}, pregunta: {}, alternativas {} {}".format(TRIVIA_API['results'][i]['difficulty'],TRIVIA_API['results'][i]['question'],TRIVIA_API['results'][i]['incorrect_answers'],TRIVIA_API['results'][i]['correct_answer']))
+    for i in range(len(random_categories)):
+        print(i,random_categories[i]['category'])
     print("iniciando el maravillos bot")
     #bot.infinity_polling()
     #definimos la ruta del archivo de configuracion de ngrok
