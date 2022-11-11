@@ -147,6 +147,7 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"escriba el numero maximo",reply_markup=markup)
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese el numero de intentos")
+        #Trivia _-------------------------------------------------------------------_
         elif(trivia_start == True and question_count == 0 ):
             number_start = False
             if(stop_iterator != True):
@@ -208,6 +209,7 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta correcta ")
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
+        #-----------------------------------------------------------------------------
         elif(number_start == True and max_number != 0 and (message.json)['from']['first_name'] in user_first_game):
             try:
                 for i in range(len(trys_list)):
