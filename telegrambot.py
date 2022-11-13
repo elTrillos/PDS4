@@ -108,8 +108,7 @@ def bot_send_text(message):
     global next_question
     global trivia_start
     global multiple_question_response
-    next_question=True
-    current_question=0
+    global answering
     markup = ForceReply()
     val_try = 0
     if(message.text.startswith("/")):
@@ -152,10 +151,9 @@ def bot_send_text(message):
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese el numero de intentos")
         #Trivia _-------------------------------------------------------------------_
-        elif(trivia_start == True and question_count == 0 and next_question==True):
+        elif(trivia_start == True and question_count == 0):
             number_start = False
             print("xd")
-            print(next_question)
             if(stop_iterator != True):
                 if(message.text == 'stop'):
                     stop_iterator = True
@@ -175,8 +173,9 @@ def bot_send_text(message):
                 bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
                 try:
                     question_count = int(message.text)
-                    
+                    current_question=0
                     next_question=False
+                    answering=True
                     bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
                     if(question_count > 0):
                         response_list = []
@@ -195,12 +194,38 @@ def bot_send_text(message):
                         question_count = 0
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
-        elif(trivia_start == True and question_count != 0 and next_question==False):
+        elif(trivia_start == True and next_question==True and answering==False):
+            bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
+            print("xd2")
+            print(next_question)
+            print(answering)
+            answering=True
+            next_question=False
+            if(question_count > 0):
+                response_list = []
+                response_list.append(random_categories[current_question]['incorrect_answers'][0])
+                response_list.append(random_categories[current_question]['incorrect_answers'][1])
+                response_list.append(random_categories[current_question]['incorrect_answers'][2])
+                response_list.append(random_categories[current_question]['correct_answer'])
+                random.shuffle(response_list)
+                bot.send_message(message.chat.id, "tema: {}\n pregunta n°{}: {} \n alternativas: \nA: {}\nB: {}\nC: {}\nD: {}".format(
+                    random_categories[current_question]['category'],current_question+1,random_categories[current_question]['question'],response_list[0],
+                    response_list[1],response_list[2],response_list[3]))
+                multiple_question_response.append(response_list)
+                response_list = []
+            else:
+                bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
+                question_count = 0
+        elif(trivia_start == True and question_count != 0 and next_question==False and answering==True):
             if(message.text == 'A' or message.text == 'a'):
                 if(multiple_question_response[0][0] == random_categories[0]['correct_answer']):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
+                    answering=False
+                    if question_count==current_question:
+                        bot.send_message(message.chat.id,"Juego terminado! ")
+                        trivia_start=False
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'B' or message.text == 'b'):
@@ -208,6 +233,10 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
+                    answering=False
+                    if question_count==current_question:
+                        bot.send_message(message.chat.id,"Juego terminado! ")
+                        trivia_start=False
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'C' or message.text == 'c'):
@@ -215,6 +244,10 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
+                    answering=False
+                    if question_count==current_question:
+                        bot.send_message(message.chat.id,"Juego terminado! ")
+                        trivia_start=False
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'D' or message.text == 'd'):
@@ -222,6 +255,10 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
+                    answering=False
+                    if question_count==current_question:
+                        bot.send_message(message.chat.id,"Juego terminado! ")
+                        trivia_start=False
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
         #-----------------------------------------------------------------------------
