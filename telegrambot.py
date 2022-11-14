@@ -219,7 +219,7 @@ def bot_send_text(message):
         elif(trivia_start == True and question_count != 0 and next_question==False and answering==True):
             print("current_question: ", current_question)
             print("multiple_question_response: ", multiple_question_response)
-            print("random_categories: ", random_categories)
+            print("random_categories[current_question]['correct_answer']: ", random_categories[current_question]['correct_answer'])
             if(message.text == 'A' or message.text == 'a'):
                 if(multiple_question_response[current_question][0] == random_categories[current_question]['correct_answer']):
                     bot.send_message(message.chat.id,"esta correcta ")
@@ -229,6 +229,18 @@ def bot_send_text(message):
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
                         trivia_start=False
+                        trivia_start=False
+                        user_in_game = []
+                        user_first_game = []
+                        trys_list = []
+                        loser_list = []
+                        number_start = False
+                        stop_iterator = False
+                        trys = 0
+                        max_number = 0
+                        numero_seleccionado = 0
+                        question_count = 0
+                        multiple_question_response = []
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'B' or message.text == 'b'):
@@ -240,6 +252,17 @@ def bot_send_text(message):
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
                         trivia_start=False
+                        user_in_game = []
+                        user_first_game = []
+                        trys_list = []
+                        loser_list = []
+                        number_start = False
+                        stop_iterator = False
+                        trys = 0
+                        max_number = 0
+                        numero_seleccionado = 0
+                        question_count = 0
+                        multiple_question_response = []
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'C' or message.text == 'c'):
@@ -251,6 +274,18 @@ def bot_send_text(message):
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
                         trivia_start=False
+                        trivia_start=False
+                        user_in_game = []
+                        user_first_game = []
+                        trys_list = []
+                        loser_list = []
+                        number_start = False
+                        stop_iterator = False
+                        trys = 0
+                        max_number = 0
+                        numero_seleccionado = 0
+                        question_count = 0
+                        multiple_question_response = []
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'D' or message.text == 'd'):
@@ -262,6 +297,18 @@ def bot_send_text(message):
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
                         trivia_start=False
+                        trivia_start=False
+                        user_in_game = []
+                        user_first_game = []
+                        trys_list = []
+                        loser_list = []
+                        number_start = False
+                        stop_iterator = False
+                        trys = 0
+                        max_number = 0
+                        numero_seleccionado = 0
+                        question_count = 0
+                        multiple_question_response = []
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
         #-----------------------------------------------------------------------------
