@@ -222,7 +222,9 @@ def bot_send_text(message):
             print("random_categories[current_question]['correct_answer']: ", random_categories[current_question]['correct_answer'])
             if(message.text == 'A' or message.text == 'a'):
                 if(multiple_question_response[current_question][0] == random_categories[current_question]['correct_answer']):
-                    bot.send_message(message.chat.id,"esta correcta ")
+                    bot.send_message(message.chat.id,"La respuesta correcta era A!")
+                    bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
+                    bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
                     current_question+=1
                     next_question=True
                     answering=False
@@ -245,7 +247,9 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'B' or message.text == 'b'):
                 if(multiple_question_response[current_question][1] == random_categories[current_question]['correct_answer']):
-                    bot.send_message(message.chat.id,"esta correcta ")
+                    bot.send_message(message.chat.id,"La respuesta correcta era B!")
+                    bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
+                    bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
                     current_question+=1
                     next_question=True
                     answering=False
@@ -267,7 +271,9 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'C' or message.text == 'c'):
                 if(multiple_question_response[current_question][2] == random_categories[current_question]['correct_answer']):
-                    bot.send_message(message.chat.id,"esta correcta ")
+                    bot.send_message(message.chat.id,"La respuesta correcta era C!")
+                    bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
+                    bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
                     current_question+=1
                     next_question=True
                     answering=False
@@ -290,7 +296,9 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'D' or message.text == 'd'):
                 if(multiple_question_response[current_question][3] == random_categories[current_question]['correct_answer']):
-                    bot.send_message(message.chat.id,"esta correcta ")
+                    bot.send_message(message.chat.id,"La respuesta correcta era D!")
+                    bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
+                    bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
                     current_question+=1
                     next_question=True
                     answering=False
