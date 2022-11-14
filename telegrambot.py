@@ -195,10 +195,10 @@ def bot_send_text(message):
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
         elif(trivia_start == True and next_question==True and answering==False):
-            bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
             print("xd2")
             print(next_question)
             print(answering)
+            print("current_question: ", current_question)
             answering=True
             next_question=False
             if(question_count > 0):
@@ -217,8 +217,11 @@ def bot_send_text(message):
                 bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                 question_count = 0
         elif(trivia_start == True and question_count != 0 and next_question==False and answering==True):
+            print("current_question: ", current_question)
+            print("multiple_question_response: ", multiple_question_response)
+            print("random_categories: ", random_categories)
             if(message.text == 'A' or message.text == 'a'):
-                if(multiple_question_response[0][0] == random_categories[0]['correct_answer']):
+                if(multiple_question_response[current_question][0] == random_categories[current_question]['correct_answer']):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
@@ -229,7 +232,7 @@ def bot_send_text(message):
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'B' or message.text == 'b'):
-                if(multiple_question_response[0][1] == random_categories[0]['correct_answer']):
+                if(multiple_question_response[current_question][1] == random_categories[current_question]['correct_answer']):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
@@ -240,7 +243,7 @@ def bot_send_text(message):
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'C' or message.text == 'c'):
-                if(multiple_question_response[0][2] == random_categories[0]['correct_answer']):
+                if(multiple_question_response[current_question][2] == random_categories[current_question]['correct_answer']):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
@@ -251,7 +254,7 @@ def bot_send_text(message):
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'D' or message.text == 'd'):
-                if(multiple_question_response[0][3] == random_categories[0]['correct_answer']):
+                if(multiple_question_response[current_question][3] == random_categories[current_question]['correct_answer']):
                     bot.send_message(message.chat.id,"esta correcta ")
                     current_question+=1
                     next_question=True
