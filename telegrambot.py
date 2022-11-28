@@ -21,10 +21,12 @@ multiple_question_response = []
 number_start = False
 trivia_start = False
 stop_iterator = False
+trivia_mode = 0
 trys = 0
 max_number = 0
 numero_seleccionado = 0
 question_count = 0
+
 
 #incorporando preguntas
 for i in range(len((TRIVIA_API['results']))):
@@ -53,6 +55,7 @@ def send_welcome(message):
     global trys
     global question_count
     global multiple_question_response
+    global trivia_mode
     markup = ForceReply()
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
@@ -80,6 +83,7 @@ def send_welcome(message):
         number_start = False
         trivia_start = False
         stop_iterator = False
+        trivia_mode = 0
         trys = 0
         max_number = 0
         numero_seleccionado = 0
@@ -109,6 +113,7 @@ def bot_send_text(message):
     global trivia_start
     global multiple_question_response
     global answering
+    global trivia_mode
     markup = ForceReply()
     val_try = 0
     if(message.text.startswith("/")):
@@ -160,7 +165,7 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
                     for i in user_first_game:
                         bot.send_message(message.chat.id,"{}".format(i))
-                    bot.send_message(message.chat.id,"escriba la cantidad de preguntas",reply_markup=markup)
+                    bot.send_message(message.chat.id,"elija el modo de trivia [first|timer]",reply_markup=markup)
                 else:
                     if((message.json)['from']['first_name'] in user_first_game):
                         bot.send_message(message.chat.id,"este usuario ya se añadio")
@@ -169,8 +174,18 @@ def bot_send_text(message):
                         user_first_game.append((message.json)['from']['first_name'])
                         bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
                         bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+            elif(trivia_mode == 0):
+                if(str(message.text).lower() == "timer"):
+                    trivia_mode = 2
+                    bot.send_message(message.chat.id,"se selecciono el modo timer")
+                else:
+                    trivia_mode = 1
+                    bot.send_message(message.chat.id,"se selecciono el modo first")
+                    for i in user_first_game:
+                        trys_list.append([i,0])
+                    print(trys_list)
+                bot.send_message(message.chat.id,"escriba la cantidad de preguntas",reply_markup=markup)
             else:
-                bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
                 try:
                     question_count = int(message.text)
                     current_question=0
@@ -217,19 +232,40 @@ def bot_send_text(message):
                 bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                 question_count = 0
         elif(trivia_start == True and question_count != 0 and next_question==False and answering==True):
-            print("current_question: ", current_question)
-            print("multiple_question_response: ", multiple_question_response)
-            print("random_categories[current_question]['correct_answer']: ", random_categories[current_question]['correct_answer'])
+            #print("current_question: ", current_question)
+            #print("multiple_question_response: ", multiple_question_response)
+            #print("random_categories[current_question]['correct_answer']: ", random_categories[current_question]['correct_answer'])
             if(message.text == 'A' or message.text == 'a'):
                 if(multiple_question_response[current_question][0] == random_categories[current_question]['correct_answer']):
                     bot.send_message(message.chat.id,"La respuesta correcta era A!")
                     bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
                     bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
+                    for i in range(len(trys_list)):
+                        if(trys_list[i][0] == (message.json)['from']['first_name']):
+                            val_try = trys_list[i][1]  
+                            print(val_try)
+                            trys_list.remove([(message.json)['from']['first_name'],val_try])
+                            val_try = val_try+1
+                            trys_list.append([(message.json)['from']['first_name'],val_try])
+                            print(trys_list,"oasdkskds")
+                            print("---------------------------------------------------------------")
+                            val_try = 0
+                            break
                     current_question+=1
                     next_question=True
                     answering=False
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
+                        winer_trivia = []
+                        for i in range(len(trys_list)):
+                            winer_trivia.append(trys_list[i][1])
+                        print(winer_trivia)
+                        Max = max(winer_trivia)
+                        for i in range(len(trys_list)):
+                            if(Max == trys_list[i][1]):
+                                bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
+                                print("el ganador es {}".format(trys_list[i][0]))
+                                break
                         trivia_start=False
                         trivia_start=False
                         user_in_game = []
@@ -250,11 +286,32 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"La respuesta correcta era B!")
                     bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
                     bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
+                    for i in range(len(trys_list)):
+                        if(trys_list[i][0] == (message.json)['from']['first_name']):
+                            val_try = trys_list[i][1]  
+                            print(val_try)
+                            trys_list.remove([(message.json)['from']['first_name'],val_try])
+                            val_try = val_try+1
+                            trys_list.append([(message.json)['from']['first_name'],val_try])
+                            print(trys_list,"oasdkskds")
+                            print("---------------------------------------------------------------")
+                            val_try = 0
+                            break
                     current_question+=1
                     next_question=True
                     answering=False
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
+                        winer_trivia = []
+                        for i in range(len(trys_list)):
+                            winer_trivia.append(trys_list[i][1])
+                        print(winer_trivia)
+                        Max = max(winer_trivia)
+                        for i in range(len(trys_list)):
+                            if(Max == trys_list[i][1]):
+                                bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
+                                print("el ganador es {}".format(trys_list[i][0]))
+                                break
                         trivia_start=False
                         user_in_game = []
                         user_first_game = []
@@ -274,11 +331,32 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"La respuesta correcta era C!")
                     bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
                     bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
+                    for i in range(len(trys_list)):
+                        if(trys_list[i][0] == (message.json)['from']['first_name']):
+                            val_try = trys_list[i][1]  
+                            print(val_try)
+                            trys_list.remove([(message.json)['from']['first_name'],val_try])
+                            val_try = val_try+1
+                            trys_list.append([(message.json)['from']['first_name'],val_try])
+                            print(trys_list,"oasdkskds")
+                            print("---------------------------------------------------------------")
+                            val_try = 0
+                            break
                     current_question+=1
                     next_question=True
                     answering=False
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
+                        winer_trivia = []
+                        for i in range(len(trys_list)):
+                            winer_trivia.append(trys_list[i][1])
+                        print(winer_trivia)
+                        Max = max(winer_trivia)
+                        for i in range(len(trys_list)):
+                            if(Max == trys_list[i][1]):
+                                bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
+                                print("el ganador es {}".format(trys_list[i][0]))
+                                break
                         trivia_start=False
                         trivia_start=False
                         user_in_game = []
@@ -299,11 +377,32 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"La respuesta correcta era D!")
                     bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
                     bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
+                    for i in range(len(trys_list)):
+                        if(trys_list[i][0] == (message.json)['from']['first_name']):
+                            val_try = trys_list[i][1]  
+                            print(val_try)
+                            trys_list.remove([(message.json)['from']['first_name'],val_try])
+                            val_try = val_try+1
+                            trys_list.append([(message.json)['from']['first_name'],val_try])
+                            print(trys_list,"oasdkskds")
+                            print("---------------------------------------------------------------")
+                            val_try = 0
+                            break
                     current_question+=1
                     next_question=True
                     answering=False
                     if question_count==current_question:
                         bot.send_message(message.chat.id,"Juego terminado! ")
+                        winer_trivia = []
+                        for i in range(len(trys_list)):
+                            winer_trivia.append(trys_list[i][1])
+                        print(winer_trivia)
+                        Max = max(winer_trivia)
+                        for i in range(len(trys_list)):
+                            if(Max == trys_list[i][1]):
+                                bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
+                                print("el ganador es {}".format(trys_list[i][0]))
+                                break
                         trivia_start=False
                         trivia_start=False
                         user_in_game = []
@@ -380,8 +479,8 @@ def bot_send_text(message):
 
 if __name__ == '__main__':
     #print("nivel: {}, pregunta: {}, alternativas {} {}".format(TRIVIA_API['results'][i]['difficulty'],TRIVIA_API['results'][i]['question'],TRIVIA_API['results'][i]['incorrect_answers'],TRIVIA_API['results'][i]['correct_answer']))
-    for i in range(len(random_categories)):
-        print(i,random_categories[i]['category'])
+    # for i in range(len(random_categories)):
+    #     print(i,random_categories[i]['category'])
     print("iniciando el maravillos bot")
     #bot.infinity_polling()
     #definimos la ruta del archivo de configuracion de ngrok
