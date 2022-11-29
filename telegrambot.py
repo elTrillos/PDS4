@@ -121,6 +121,7 @@ def bot_send_text(message):
     global trivia_start
     global multiple_question_response
     global answering
+    global currentWords
     global trivia_mode
     markup = ForceReply()
     val_try = 0
@@ -514,13 +515,20 @@ def bot_send_text(message):
                         r = requests.get(file_url)
                         #print(r.json)
                         rson=r.json()
+                        
                         for i in rson:
+                            currentWords.append(i["word"])
                             print(i["word"])
                     else:
                         bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                         question_count = 0
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
+        elif(words_start == True and question_count == 0):
+            if (message.text in currentWords):
+                userr=(message.json)['from']['first_name']
+                bot.send_message(message.chat.id,"{} encontro una palabra!".format(userr))
+
         else:
             None
 
