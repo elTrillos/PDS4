@@ -27,6 +27,7 @@ trys = 0
 max_number = 0
 numero_seleccionado = 0
 question_count = 0
+chat_list = []
 combinations=["tr??", "ai??", "?ai?", "ma??","??ta????????","fl???","?co??","pe???","???ye?","?a???e?","?a???e??","?a???e???","?a???i?","ae??", "for???", "for??????"]
 
 #incorporando preguntas
@@ -59,29 +60,33 @@ def send_welcome(message):
     global question_count
     global multiple_question_response
     global trivia_mode
+    global chat_list
     markup = ForceReply()
     if(message.text.startswith("/number")):
         bot.send_message(message.chat.id,"empezando el juego number ...")
         bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
         number_start = True
         numero_seleccionado = random.randint(0,10)
+        chat_list.append((message.json)['chat']['id'])
     elif(message.text.startswith("/trivia")):
         bot.send_message(message.chat.id,"empezando el juego trivia ...")
         random.shuffle(random_categories)
         bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
         trivia_start = True
+        chat_list.append((message.json)['chat']['id'])
     elif(message.text.startswith("/words")):
         bot.send_message(message.chat.id,"empezando el juego words ...")
         random.shuffle(random_categories)
         bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
         words_start = True
+        chat_list.append((message.json)['chat']['id'])
     elif(message.text.startswith("/help") or message.text.startswith("/start") ):
         bot.reply_to(message,"comandos disponibles:")
         bot.send_message(message.chat.id,"/number")
         bot.send_message(message.chat.id,"/trivia")
         bot.send_message(message.chat.id,"/extra")
         #bot.send_message(message.chat.id,"el json {}".format(message.json))
-        #bot.send_message(message.chat.id,"el otra cosa {}".format((message.json)['from']['id'])) #el identificador individual de cada usuario.
+        #bot.send_message(message.chat.id,"el otra cosa {}".format((message.json)['chat']['id'])) #el identificador individual de cada usuario.
     elif(message.text.startswith("/stop")):
         bot.send_message(message.chat.id,"juego terminado")
         user_in_game = []
@@ -98,6 +103,7 @@ def send_welcome(message):
         numero_seleccionado = 0
         question_count = 0
         multiple_question_response = []
+        chat_list.remove((message.json)['chat']['id'])
     elif(message.text.startswith("/extra")):
         bot.send_message(message.chat.id,"3°juego En DESARROLLO -_-")
     elif(message.text.startswith("/stats")):
@@ -129,7 +135,7 @@ def bot_send_text(message):
     val_try = 0
     if(message.text.startswith("/")):
         bot.send_message(message.chat.id,"ejemplito")
-    else:
+    elif((message.json)['chat']['id'] in chat_list):
         if(number_start == True and max_number == 0 ):
             trivia_start = False
             if(stop_iterator != True):
@@ -140,13 +146,15 @@ def bot_send_text(message):
                         bot.send_message(message.chat.id,"{}".format(i))
                     bot.send_message(message.chat.id,"escriba la cantidad de intentos",reply_markup=markup)
                 else:
-                    if((message.json)['from']['first_name'] in user_first_game):
+                    if((message.json)['from']['first_name'] in user_first_game and (message.text == 'yo' or message.text == 'Yo' or message.text == 'YO')):
                         bot.send_message(message.chat.id,"este usuario ya se añadio")
-                    else:
+                    elif(message.text == 'yo' or message.text == 'Yo' or message.text == 'YO'):
                         user_in_game.append((message.json)['from']['id'])
                         user_first_game.append((message.json)['from']['first_name'])
                         bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
                         bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+                    else: 
+                        None
   
             elif(trys != 0):
                 try:
@@ -155,7 +163,8 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"numero maximo elegido {}".format(max_number))
                     bot.send_message(message.chat.id,"escribe un numero :)",reply_markup=markup)
                 except:
-                    bot.send_message(message.chat.id,"no es un numero ERROR, ingrese el numero maximo")
+                    #bot.send_message(message.chat.id,"no es un numero ERROR, ingrese el numero maximo")
+                    None
             else:
                 try:
                     trys = int(message.text)
@@ -165,7 +174,8 @@ def bot_send_text(message):
                     #bot.send_message(message.chat.id,"lista {}".format(trys_list))
                     bot.send_message(message.chat.id,"escriba el numero maximo",reply_markup=markup)
                 except:
-                    bot.send_message(message.chat.id,"no es un numero, ingrese el numero de intentos")
+                    #bot.send_message(message.chat.id,"no es un numero, ingrese el numero de intentos")
+                    None
         #Trivia _-------------------------------------------------------------------_
         elif(trivia_start == True and question_count == 0):
             number_start = False
@@ -178,13 +188,15 @@ def bot_send_text(message):
                         bot.send_message(message.chat.id,"{}".format(i))
                     bot.send_message(message.chat.id,"elija el modo de trivia [first|timer]",reply_markup=markup)
                 else:
-                    if((message.json)['from']['first_name'] in user_first_game):
+                    if((message.json)['from']['first_name'] in user_first_game and (message.text == 'yo' or message.text == 'Yo' or message.text == 'YO')):
                         bot.send_message(message.chat.id,"este usuario ya se añadio")
-                    else:
+                    elif(message.text == 'yo' or message.text == 'Yo' or message.text == 'YO'):
                         user_in_game.append((message.json)['from']['id'])
                         user_first_game.append((message.json)['from']['first_name'])
                         bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
                         bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+                    else: 
+                        None
             elif(trivia_mode == 0):
                 if(str(message.text).lower() == "timer"):
                     trivia_mode = 2
@@ -219,8 +231,9 @@ def bot_send_text(message):
                         bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                         question_count = 0
                 except:
-                    bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
-        elif(trivia_start == True and next_question==True and answering==False):
+                    #bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
+                    None
+        elif(trivia_start == True and next_question==True and answering==False ):
             print("xd2")
             print(next_question)
             print(answering)
@@ -242,7 +255,7 @@ def bot_send_text(message):
             else:
                 bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                 question_count = 0
-        elif(trivia_start == True and question_count != 0 and next_question==False and answering==True):
+        elif(trivia_start == True and question_count != 0 and next_question==False and answering==True and (message.json)['from']['first_name'] in user_first_game):
             #print("current_question: ", current_question)
             #print("multiple_question_response: ", multiple_question_response)
             #print("random_categories[current_question]['correct_answer']: ", random_categories[current_question]['correct_answer'])
@@ -276,6 +289,7 @@ def bot_send_text(message):
                             if(Max == trys_list[i][1]):
                                 bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
                                 print("el ganador es {}".format(trys_list[i][0]))
+                                bot.send_message(message.chat.id,"puntajes totales:\n{}".format(trys_list))
                                 break
                         trivia_start=False
                         trivia_start=False
@@ -322,6 +336,7 @@ def bot_send_text(message):
                             if(Max == trys_list[i][1]):
                                 bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
                                 print("el ganador es {}".format(trys_list[i][0]))
+                                bot.send_message(message.chat.id,"puntajes totales:\n{}".format(trys_list))
                                 break
                         trivia_start=False
                         user_in_game = []
@@ -367,6 +382,7 @@ def bot_send_text(message):
                             if(Max == trys_list[i][1]):
                                 bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
                                 print("el ganador es {}".format(trys_list[i][0]))
+                                bot.send_message(message.chat.id,"puntajes totales:\n{}".format(trys_list))
                                 break
                         trivia_start=False
                         trivia_start=False
@@ -384,7 +400,7 @@ def bot_send_text(message):
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
             if(message.text == 'D' or message.text == 'd'):
-                if(multiple_question_response[current_question][3] == random_categories[current_question]['correct_answer']):
+                if(multiple_question_response[current_question][3] == random_categories[current_question]['correct_answer'] ):
                     bot.send_message(message.chat.id,"La respuesta correcta era D!")
                     bot.send_message(message.chat.id,"{} respondio correctamente ".format((message.json)['from']['first_name']))
                     bot.send_message(message.chat.id,"Para recivir la proxima pregunta envie algun mensaje")
@@ -413,6 +429,7 @@ def bot_send_text(message):
                             if(Max == trys_list[i][1]):
                                 bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
                                 print("el ganador es {}".format(trys_list[i][0]))
+                                bot.send_message(message.chat.id,"puntajes totales:\n{}".format(trys_list))
                                 break
                         trivia_start=False
                         trivia_start=False
