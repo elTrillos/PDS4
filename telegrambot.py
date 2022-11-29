@@ -1,4 +1,4 @@
-
+import requests
 from config import *
 from trivia_api import TRIVIA_API
 import telebot
@@ -26,7 +26,7 @@ trys = 0
 max_number = 0
 numero_seleccionado = 0
 question_count = 0
-
+combinations=["tr??", "ai??", "?ai?", "ma??"]
 
 #incorporando preguntas
 for i in range(len((TRIVIA_API['results']))):
@@ -41,7 +41,7 @@ def webhook():
         bot.process_new_updates([update])
         return "OK", 200
 
-@bot.message_handler(commands=['start', 'help', 'number', 'trivia','extra', 'stop', 'stats'])
+@bot.message_handler(commands=['start', 'help', 'number', 'trivia','extra', 'stop', 'stats', 'words'])
 def send_welcome(message):
     global trivia_start
     global number_start
@@ -89,6 +89,7 @@ def send_welcome(message):
         number_start = False
         trivia_start = False
         stop_iterator = False
+        words_start = False
         trivia_mode = 0
         trys = 0
         max_number = 0
@@ -105,6 +106,7 @@ def send_welcome(message):
 @bot.message_handler(content_types=["text"])
 def bot_send_text(message):
     global number_start
+    global words_start
     global user_in_game
     global user_first_game
     global trys_list
@@ -506,17 +508,14 @@ def bot_send_text(message):
                     answering=True
                     bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
                     if(question_count > 0):
-                        response_list = []
-                        response_list.append(random_categories[current_question]['incorrect_answers'][0])
-                        response_list.append(random_categories[current_question]['incorrect_answers'][1])
-                        response_list.append(random_categories[current_question]['incorrect_answers'][2])
-                        response_list.append(random_categories[current_question]['correct_answer'])
-                        random.shuffle(response_list)
-                        bot.send_message(message.chat.id, "tema: {}\n pregunta n°{}: {} \n alternativas: \nA: {}\nB: {}\nC: {}\nD: {}".format(
-                            random_categories[current_question]['category'],current_question+1,random_categories[current_question]['question'],response_list[0],
-                            response_list[1],response_list[2],response_list[3]))
-                        multiple_question_response.append(response_list)
-                        response_list = []
+                        combination=combinations[random.randint(0,len(combinations))]
+                        bot.send_message(message.chat.id,"Palabra de formato: {}".format(combination))
+                        file_url = f'https://api.datamuse.com/words?sp={combination}'
+                        r = requests.get(file_url)
+                        #print(r.json)
+                        rson=r.json()
+                        for i in rson:
+                            print(i["word"])
                     else:
                         bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                         question_count = 0
