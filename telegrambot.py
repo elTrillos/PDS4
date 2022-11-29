@@ -136,6 +136,11 @@ def bot_send_text(message):
     if(message.text.startswith("/")):
         bot.send_message(message.chat.id,"ejemplito")
     elif((message.json)['chat']['id'] in chat_list):
+        print(words_start)
+        print(trivia_start)
+        print(number_start)
+        print(question_count)
+        print(stop_iterator)
         if(number_start == True and max_number == 0 ):
             trivia_start = False
             if(stop_iterator != True):
@@ -508,6 +513,8 @@ def bot_send_text(message):
                 if(message.text == 'stop'):
                     stop_iterator = True
                     words_start = True
+                    number_start=False
+                    trivia_start=False
                     bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
                     for i in user_first_game:
                         bot.send_message(message.chat.id,"{}".format(i))
@@ -527,6 +534,7 @@ def bot_send_text(message):
                     question_count = int(message.text)
                     current_question=0
                     next_question=False
+                    
                     print("xddddd")
                     answering=True
                     bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
@@ -545,8 +553,10 @@ def bot_send_text(message):
                         question_count = 0
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
-        elif(words_start == True and question_count != 0 and stop_iterator ==True):
-            if (message.text.toLowerCase() in current_words):
+        elif(words_start == True and question_count > 0 and stop_iterator ==True):
+            print(message.text)
+            mesLow=message.text.lower()
+            if (mesLow in current_words):
                 userr=(message.json)['from']['first_name']
                 bot.send_message(message.chat.id,"{} encontro una palabra!".format(userr))
                 if current_question==question_count-1:
@@ -571,7 +581,8 @@ def bot_send_text(message):
                 bot.send_message(message.chat.id,"{} esa palabra no es valida!".format(userr))
 
         else:
-            None
+            print("why")
+        print("pq xd")
 
 if __name__ == '__main__':
     #print("nivel: {}, pregunta: {}, alternativas {} {}".format(TRIVIA_API['results'][i]['difficulty'],TRIVIA_API['results'][i]['question'],TRIVIA_API['results'][i]['incorrect_answers'],TRIVIA_API['results'][i]['correct_answer']))
