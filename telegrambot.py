@@ -45,6 +45,7 @@ def webhook():
 def send_welcome(message):
     global trivia_start
     global number_start
+    global words_start
     global max_number
     global numero_seleccionado
     global user_in_game
@@ -67,6 +68,11 @@ def send_welcome(message):
         random.shuffle(random_categories)
         bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
         trivia_start = True
+    elif(message.text.startswith("/words")):
+        bot.send_message(message.chat.id,"empezando el juego words ...")
+        random.shuffle(random_categories)
+        bot.send_message(message.chat.id,"ingrese los jugadores (cada jugador debe escribir YO)")
+        words_start = True
     elif(message.text.startswith("/help") or message.text.startswith("/start") ):
         bot.reply_to(message,"comandos disponibles:")
         bot.send_message(message.chat.id,"/number")
@@ -473,7 +479,49 @@ def bot_send_text(message):
                     bot.send_message(message.chat.id,"no es un numero {}".format(numero_seleccionado))
             except:
                  bot.send_message(message.chat.id,"no es un numero")
-        
+        elif(words_start == True and question_count == 0):
+            number_start = False
+            print("xd")
+            if(stop_iterator != True):
+                if(message.text == 'stop'):
+                    stop_iterator = True
+                    bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
+                    for i in user_first_game:
+                        bot.send_message(message.chat.id,"{}".format(i))
+                    bot.send_message(message.chat.id,"escriba la cantidad de preguntas",reply_markup=markup)
+                else:
+                    if((message.json)['from']['first_name'] in user_first_game):
+                        bot.send_message(message.chat.id,"este usuario ya se añadio")
+                    else:
+                        user_in_game.append((message.json)['from']['id'])
+                        user_first_game.append((message.json)['from']['first_name'])
+                        bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
+                        bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
+            else:
+                bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
+                try:
+                    question_count = int(message.text)
+                    current_question=0
+                    next_question=False
+                    answering=True
+                    bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
+                    if(question_count > 0):
+                        response_list = []
+                        response_list.append(random_categories[current_question]['incorrect_answers'][0])
+                        response_list.append(random_categories[current_question]['incorrect_answers'][1])
+                        response_list.append(random_categories[current_question]['incorrect_answers'][2])
+                        response_list.append(random_categories[current_question]['correct_answer'])
+                        random.shuffle(response_list)
+                        bot.send_message(message.chat.id, "tema: {}\n pregunta n°{}: {} \n alternativas: \nA: {}\nB: {}\nC: {}\nD: {}".format(
+                            random_categories[current_question]['category'],current_question+1,random_categories[current_question]['question'],response_list[0],
+                            response_list[1],response_list[2],response_list[3]))
+                        multiple_question_response.append(response_list)
+                        response_list = []
+                    else:
+                        bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
+                        question_count = 0
+                except:
+                    bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
         else:
             None
 
