@@ -21,12 +21,13 @@ multiple_question_response = []
 number_start = False
 trivia_start = False
 stop_iterator = False
+current_words = []
 trivia_mode = 0
 trys = 0
 max_number = 0
 numero_seleccionado = 0
 question_count = 0
-combinations=["tr??", "ai??", "?ai?", "ma??"]
+combinations=["tr??", "ai??", "?ai?", "ma??","??ta????????","fl???","?co??","pe???","???ye?","?a???e?","?a???e??","?a???e???","?a???i?","ae??", "for???", "for??????"]
 
 #incorporando preguntas
 for i in range(len((TRIVIA_API['results']))):
@@ -52,6 +53,7 @@ def send_welcome(message):
     global user_first_game
     global loser_list
     global trys_list
+    global current_words
     global stop_iterator
     global trys
     global question_count
@@ -121,7 +123,7 @@ def bot_send_text(message):
     global trivia_start
     global multiple_question_response
     global answering
-    global currentWords
+    global current_words
     global trivia_mode
     markup = ForceReply()
     val_try = 0
@@ -483,11 +485,12 @@ def bot_send_text(message):
             except:
                  bot.send_message(message.chat.id,"no es un numero")
         elif(words_start == True and question_count == 0):
-            number_start = False
-            print("xd")
+            words_start = True
+            print("xd3")
             if(stop_iterator != True):
                 if(message.text == 'stop'):
                     stop_iterator = True
+                    words_start = True
                     bot.send_message(message.chat.id,"se termino de añadir a los usuarios/jugadores | jugadores actuales: ")
                     for i in user_first_game:
                         bot.send_message(message.chat.id,"{}".format(i))
@@ -503,31 +506,52 @@ def bot_send_text(message):
             else:
                 bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
                 try:
+                    print("xddddd")
                     question_count = int(message.text)
                     current_question=0
                     next_question=False
+                    print("xddddd")
                     answering=True
                     bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
                     if(question_count > 0):
-                        combination=combinations[random.randint(0,len(combinations))]
+                        combination=combinations[random.randint(0,len(combinations)-1)]
+                        print(combination)
                         bot.send_message(message.chat.id,"Palabra de formato: {}".format(combination))
                         file_url = f'https://api.datamuse.com/words?sp={combination}'
                         r = requests.get(file_url)
-                        #print(r.json)
                         rson=r.json()
-                        
                         for i in rson:
-                            currentWords.append(i["word"])
-                            print(i["word"])
+                            current_words.append(i["word"])
+                        print(current_words)
                     else:
                         bot.send_message(message.chat.id, "la cantidad de preguntas es invalida")
                         question_count = 0
                 except:
                     bot.send_message(message.chat.id,"no es un numero, ingrese la cantidad (numero) de pregunta")
-        elif(words_start == True and question_count == 0):
-            if (message.text in currentWords):
+        elif(words_start == True and question_count != 0 and stop_iterator ==True):
+            if (message.text.toLowerCase() in current_words):
                 userr=(message.json)['from']['first_name']
                 bot.send_message(message.chat.id,"{} encontro una palabra!".format(userr))
+                if current_question==question_count-1:
+                    bot.send_message(message.chat.id,"Juego terminado!")
+                    words_start=False
+                else:
+                    current_question+=1
+                    current_words=[]
+                    combination=combinations[random.randint(0,len(combinations)-1)]
+                    print(combination)
+                    bot.send_message(message.chat.id,"Siguiente palabra:")
+                    bot.send_message(message.chat.id,"Palabra de formato: {}".format(combination))
+                    file_url = f'https://api.datamuse.com/words?sp={combination}'
+                    r = requests.get(file_url)
+                    rson=r.json()
+                    for i in rson:
+                        current_words.append(i["word"])
+                    print(current_words)
+                
+            else:
+                userr=(message.json)['from']['first_name']
+                bot.send_message(message.chat.id,"{} esa palabra no es valida!".format(userr))
 
         else:
             None
