@@ -308,6 +308,7 @@ def bot_send_text(message):
                         max_number = 0
                         numero_seleccionado = 0
                         question_count = 0
+                        winer_trivia = []
                         multiple_question_response = []
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
@@ -354,6 +355,7 @@ def bot_send_text(message):
                         max_number = 0
                         numero_seleccionado = 0
                         question_count = 0
+                        winer_trivia = []
                         multiple_question_response = []
                 else:
                     bot.send_message(message.chat.id,"esta INcorrecta ")
@@ -395,11 +397,13 @@ def bot_send_text(message):
                         user_first_game = []
                         trys_list = []
                         loser_list = []
+                        winer_trivia = []
                         number_start = False
                         stop_iterator = False
                         trys = 0
                         max_number = 0
                         numero_seleccionado = 0
+                        winer_trivia = []
                         question_count = 0
                         multiple_question_response = []
                 else:
@@ -441,6 +445,7 @@ def bot_send_text(message):
                         user_in_game = []
                         user_first_game = []
                         trys_list = []
+                        winer_trivia = []
                         loser_list = []
                         number_start = False
                         stop_iterator = False
@@ -528,13 +533,16 @@ def bot_send_text(message):
                         bot.send_message(message.chat.id,"se añadio a {}".format((message.json)['from']['first_name']))
                         bot.send_message(message.chat.id,"escriba stop para parar de añadir jugadores")
             else:
-                bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
+                #bot.send_message(message.chat.id,"linea 162 {}".format(question_count))
                 try:
                     print("xddddd")
                     question_count = int(message.text)
                     current_question=0
                     next_question=False
-                    
+                    for i in user_first_game:
+                        trys_list.append([i,0])
+                    print(trys_list)
+
                     print("xddddd")
                     answering=True
                     bot.send_message(message.chat.id,"cantidad de preguntas {}".format(question_count))
@@ -559,8 +567,30 @@ def bot_send_text(message):
             if (mesLow in current_words):
                 userr=(message.json)['from']['first_name']
                 bot.send_message(message.chat.id,"{} encontro una palabra!".format(userr))
+                for i in range(len(trys_list)):
+                    if(trys_list[i][0] == (message.json)['from']['first_name']):
+                        val_try = trys_list[i][1]  
+                        print(val_try)
+                        trys_list.remove([(message.json)['from']['first_name'],val_try])
+                        val_try = val_try+1
+                        trys_list.append([(message.json)['from']['first_name'],val_try])
+                        print(trys_list,"oasdkskds")
+                        print("---------------------------------------------------------------")
+                        val_try = 0
+                        break
                 if current_question==question_count-1:
                     bot.send_message(message.chat.id,"Juego terminado!")
+                    winer_trivia = []
+                    for i in range(len(trys_list)):
+                        winer_trivia.append(trys_list[i][1])
+                    print(winer_trivia)
+                    Max = max(winer_trivia)
+                    for i in range(len(trys_list)):
+                        if(Max == trys_list[i][1]):
+                            bot.send_message(message.chat.id,"el ganador es {}".format(trys_list[i][0]))
+                            print("el ganador es {}".format(trys_list[i][0]))
+                            bot.send_message(message.chat.id,"puntajes totales:\n{}".format(trys_list))
+                            break
                     words_start=False
                 else:
                     current_question+=1
@@ -578,7 +608,8 @@ def bot_send_text(message):
                 
             else:
                 userr=(message.json)['from']['first_name']
-                bot.send_message(message.chat.id,"{} esa palabra no es valida!".format(userr))
+                #bot.send_message(message.chat.id,"{} esa palabra no es valida!".format(userr))
+                None
 
         else:
             print("why")
